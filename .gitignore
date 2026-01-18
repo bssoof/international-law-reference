@@ -1,0 +1,7 @@
+src/
+target/
+pom.xml
+.vscode/
+.idea/
+*.class
+*.log
