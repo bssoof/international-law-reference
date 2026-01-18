@@ -53,8 +53,37 @@ function updateCounts() {
 }
 
 /* ==========================================================================
-   NAVIGATION & TABS
+   NAVIGATION & TABS & THEME & MOBILE
    ========================================================================== */
+function toggleTheme() {
+    const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+
+    if (isDark) {
+        root.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    } else {
+        root.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+}
+
 function switchTab(tab) {
     document.querySelectorAll(".nav-item").forEach(el => {
         el.classList.remove("active");
@@ -68,36 +97,34 @@ function switchTab(tab) {
     if (content) content.classList.add("active");
 
     const pageTitle = document.getElementById("page-title");
-    const pageIcon = document.getElementById("page-icon");
-
-    if (!pageTitle || !pageIcon) return;
-
-    switch (tab) {
-        case "treaties":
-            pageTitle.querySelector("h1").textContent = "الاتفاقيات الدولية";
-            pageTitle.querySelector("p").textContent = "مرجع شامل للمعاهدات والاتفاقيات الدولية الملزمة";
-            pageIcon.textContent = "📜";
-            renderTreaties();
-            break;
-        case "cases":
-            pageTitle.querySelector("h1").textContent = "السوابق القضائية";
-            pageTitle.querySelector("p").textContent = "أحكام وقضايا من المحاكم الدولية الرئيسية (ICJ, ICC, ECHR)";
-            pageIcon.textContent = "⚖️";
-            renderCases();
-            break;
-        case "resolutions":
-            pageTitle.querySelector("h1").textContent = "القرارات الدولية";
-            pageTitle.querySelector("p").textContent = "قاعدة بيانات قرارات مجلس الأمن والجمعية العامة";
-            pageIcon.textContent = "🗳️";
-            renderResolutions();
-            break;
-        case "resources":
-            pageTitle.querySelector("h1").textContent = "المصادر والقانون العرفي";
-            pageTitle.querySelector("p").textContent = "الروابط المباشرة للمصادر الدولية الموثوقة";
-            pageIcon.textContent = "📚";
-            break;
+    // Close sidebar on mobile when tab is clicked
+    if (window.innerWidth < 1024) {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('overlay');
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
     }
+
+    // ... rest of switchTab logic (header update)
+    if (typeof updatePageHeader === 'function') updatePageHeader(tab);
 }
+
+// Initial Loader extensions
+document.addEventListener('DOMContentLoaded', function () {
+    initDate();
+    initTheme();
+    // ... render functions
+    renderTreaties();
+    renderCases();
+    renderResolutions();
+    updateCounts();
+
+    // Expose globals
+    window.toggleTheme = toggleTheme;
+    window.toggleSidebar = toggleSidebar;
+});
 
 /* ==========================================================================
    ADVANCED SEARCH (GLOBAL)

@@ -4,25 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المرصد القانوني الدولي • International Law & Human Rights Observer</title>
+    <title>المرصد القانوني الدولي • International Law Reference</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <div class="header-top">
         <div class="header-top-content">
-            <div class="header-top-left">
-                <div class="un-logo">UN</div>
-                <div>
-                    المرصد القانوني الدولي •
-                    <span style="opacity:.82">مرجع قانوني شامل للاتفاقيات • المحاكم • القرارات</span>
-                </div>
-            </div>
-            <div style="display:flex;gap:38px;font-size:12px;">
-                <span>اليوم: <span id="current-date"></span></span>
-                <span>المرجع محدّث: يناير ٢٠٢٦</span>
-            </div>
         </div>
+    </div>
+    <div style="display:flex;gap:38px;font-size:12px;">
+        <span>اليوم: <span id="current-date"></span></span>
+        <span>المرجع محدّث: يناير ٢٠٢٦</span>
+    </div>
+    </div>
     </div>
 
     <!-- شريط البحث المتقدم -->
@@ -58,6 +53,26 @@
         </div>
     </div>
     <!-- نهاية شريط البحث المتقدم -->
+
+    <div class="header-top">
+        <div class="header-top-content">
+            <div class="un-brand">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                <div class="un-logo-symbol">UN</div>
+                <span>المرصد القانوني الدولي</span>
+            </div>
+
+            <div class="header-actions-right">
+                <button class="icon-btn" onclick="toggleTheme()" title="تبديل المظهر">🌓</button>
+                <div style="font-size: 12px; opacity: 0.9;">
+                    <span id="current-date"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
     <div class="main-container">
         <aside class="sidebar" id="sidebar">
