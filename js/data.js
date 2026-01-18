@@ -8,39 +8,30 @@
    TREATIES DATA (اتفاقيات دولية)
    ========================================================================== */
 const treatiesData = [
-    { name: "ميثاق الأمم المتحدة", date: "1945", topic: "السلام والأمن", states: "193", link: "https://treaties.un.org/doc/publication/ctc/uncharter.pdf" },
-    { name: "الإعلان العالمي لحقوق الإنسان", date: "1948", topic: "حقوق الإنسان", states: "195", link: "https://www.un.org/sites/un2.un.org/files/udhr_ar.pdf" },
-    { name: "اتفاقية منع جريمة الإبادة الجماعية", date: "1948", topic: "حقوق الإنسان", states: "152", link: "https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IV-1&chapter=4&clang=_ar" },
+    // --- Priority Treaties (Requested) ---
+    { name: "نظام روما الأساسي للمحكمة الجنائية الدولية", date: "1998", topic: "حقوق الإنسان", states: "124", link: "https://www.icc-cpi.int/sites/default/files/NR/rdonlyres/EA9AEFF7-575B-4028-9F71-8A6B7C0A2C1A/0/Rome_Statute_Arabic.pdf" },
+    { name: "ميثاق الأمم المتحدة (والنظام الأساسي لمحكمة العدل الدولية)", date: "1945", topic: "السلام والأمن", states: "193", link: "https://treaties.un.org/doc/publication/ctc/uncharter.pdf" },
+    { name: "اتفاقية منع جريمة الإبادة الجماعية", date: "1948", topic: "حقوق الإنسان", states: "153", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/convention-prevention-and-punishment-crime-genocide" },
+    { name: "الأتفاقية الدولية لقمع جريمة الفصل العنصري والمعاقبة عليها", date: "1973", topic: "حقوق الإنسان", states: "110", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-convention-suppression-and-punishment-crime-apartheid" },
+    { name: "الإعلان العالمي لحقوق الإنسان", date: "1948", topic: "حقوق الإنسان", states: "N/A", link: "https://www.un.org/sites/un2.un.org/files/udhr_ar.pdf" },
+    { name: "العهد الدولي الخاص بالحقوق المدنية والسياسية", date: "1966", topic: "حقوق الإنسان", states: "174", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-covenant-civil-and-political-rights" },
+    { name: "العهد الدولي الخاص بالحقوق الاقتصادية والاجتماعية والثقافية", date: "1966", topic: "حقوق الإنسان", states: "172", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-covenant-economic-social-and-cultural-rights" },
+
+    // --- Other Key Treaties ---
     { name: "اتفاقيات جنيف الأربع", date: "1949", topic: "القانون الإنساني", states: "196", link: "https://www.icrc.org/ar/doc/assets/files/publications/icrc-002-0173.pdf" },
     { name: "اتفاقية الأمم المتحدة لحقوق الطفل", date: "1989", topic: "حقوق الإنسان", states: "196", link: "https://www.unicef.org/arabic/arabic/crc.pdf" },
     { name: "اتفاقية القضاء على جميع أشكال التمييز ضد المرأة (سيداو)", date: "1979", topic: "حقوق الإنسان", states: "189", link: "https://www.un.org/womenwatch/daw/cedaw/text/sconvention.htm" },
-    { name: "العهد الدولي الخاص بالحقوق المدنية والسياسية", date: "1966", topic: "حقوق الإنسان", states: "173", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-covenant-civil-and-political-rights" },
-    { name: "العهد الدولي الخاص بالحقوق الاقتصادية والاجتماعية والثقافية", date: "1966", topic: "حقوق الإنسان", states: "171", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-covenant-economic-social-and-cultural-rights" },
-    { name: "اتفاقية مناهضة التعذيب", date: "1984", topic: "حقوق الإنسان", states: "173", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/convention-against-torture-and-other-cruel-inhuman-or-degrading-treatment-or-punishment" },
-    { name: "اتفاقية حقوق الأشخاص ذوي الإعاقة", date: "2006", topic: "حقوق الإنسان", states: "184", link: "https://www.un.org/development/desa/disabilities/convention-on-the-rights-of-persons-with-disabilities.html" },
+    { name: "اتفاقية مناهضة التعذيب", date: "1984", topic: "حقوق الإنسان", states: "174", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/convention-against-torture-and-other-cruel-inhuman-or-degrading-treatment-or-punishment" },
+    { name: "اتفاقية حقوق الأشخاص ذوي الإعاقة", date: "2006", topic: "حقوق الإنسان", states: "191", link: "https://www.un.org/development/desa/disabilities/convention-on-the-rights-of-persons-with-disabilities.html" },
     { name: "معاهدة عدم انتشار الأسلحة النووية (NPT)", date: "1968", topic: "نزع السلاح", states: "191", link: "https://www.un.org/disarmament/wmd/nuclear/npt/text/" },
-    { name: "معاهدة الحظر الشامل للتجارب النووية (CTBT)", date: "1996", topic: "نزع السلاح", states: "187", link: "https://www.ctbto.org/the-treaty/treaty-text" },
     { name: "اتفاقية باريس بشأن تغير المناخ", date: "2015", topic: "البيئة والمناخ", states: "195", link: "https://unfccc.int/sites/default/files/arabic_paris_agreement.pdf" },
-    { name: "بروتوكول كيوتو", date: "1997", topic: "البيئة والمناخ", states: "192", link: "https://unfccc.int/resource/docs/convkp/kparabic.pdf" },
-    { name: "اتفاقية التنوع البيولوجي", date: "1992", topic: "البيئة والمناخ", states: "196", link: "https://www.cbd.int/doc/legal/cbd-ar.pdf" },
-    { name: "اتفاقية الأمم المتحدة لقانون البحار (UNCLOS)", date: "1982", topic: "القانون البحري", states: "168", link: "https://www.un.org/depts/los/convention_agreements/texts/unclos/unclos_ar.pdf" },
+    { name: "اتفاقية الأمم المتحدة لقانون البحار (UNCLOS)", date: "1982", topic: "القانون البحري", states: "170", link: "https://www.un.org/depts/los/convention_agreements/texts/unclos/unclos_ar.pdf" },
     { name: "اتفاقية حظر الألغام المضادة للأفراد (أوتاوا)", date: "1997", topic: "السلام والأمن", states: "164", link: "https://www.icrc.org/ar/doc/assets/files/other/1997_ottawa_treaty_ar.pdf" },
-    { name: "اتفاقية الذخائر العنقودية", date: "2008", topic: "السلام والأمن", states: "110", link: "https://www.clusterconvention.org/files/2011/01/Convention-Arabic.pdf" },
-    { name: "نظام روما الأساسي للمحكمة الجنائية الدولية", date: "1998", topic: "حقوق الإنسان", states: "123", link: "https://www.icc-cpi.int/sites/default/files/NR/rdonlyres/EA9AEFF7-575B-4028-9F71-8A6B7C0A2C1A/0/Rome_Statute_Arabic.pdf" },
-    { name: "اتفاقية الأمم المتحدة لمكافحة الفساد", date: "2003", topic: "السلام والأمن", states: "189", link: "https://www.unodc.org/documents/treaties/UNCAC/Publications/Convention/08-50026_Arabic.pdf" },
+    { name: "اتفاقية الذخائر العنقودية", date: "2008", topic: "السلام والأمن", states: "112", link: "https://www.clusterconvention.org/files/2011/01/Convention-Arabic.pdf" },
+    { name: "اتفاقية الأمم المتحدة لمكافحة الفساد", date: "2003", topic: "السلام والأمن", states: "190", link: "https://www.unodc.org/documents/treaties/UNCAC/Publications/Convention/08-50026_Arabic.pdf" },
     { name: "الاتفاقية الأوروبية لحقوق الإنسان", date: "1950", topic: "حقوق الإنسان", states: "46", link: "https://www.echr.coe.int/documents/convention_ara.pdf" },
-    { name: "ميثاق الحقوق الأساسية للاتحاد الأوروبي", date: "2000", topic: "حقوق الإنسان", states: "27", link: "https://fra.europa.eu/sites/default/files/fra_uploads/1915-CFR_ARA.pdf" },
-    { name: "الميثاق الأفريقي لحقوق الإنسان والشعوب", date: "1981", topic: "حقوق الإنسان", states: "54", link: "https://au.int/sites/default/files/treaties/7775-treaty-0011_-_african_charter_on_human_and_peoples_rights_e.pdf" },
-    { name: "الإعلان الأمريكي لحقوق الإنسان", date: "1969", topic: "حقوق الإنسان", states: "24", link: "https://www.oas.org/dil/arabic/american_convention_on_human_rights_ar.pdf" },
-    { name: "اتفاقية العمل الدولية r. 182 (أسوأ أشكال عمل الأطفال)", date: "1999", topic: "حقوق الإنسان", states: "187", link: "https://www.ilo.org/wcmsp5/groups/public/---ed_norm/---normes/documents/normativeinstrument/wcms_c182_ar.pdf" },
-    { name: "اتفاقية فيينا للعلاقات الدبلوماسية", date: "1961", topic: "السلام والأمن", states: "192", link: "https://legal.un.org/ilc/texts/instruments/arabic/conventions/9_1_1961.pdf" },
-    { name: "اتفاقية فيينا للعلاقات القنصلية", date: "1963", topic: "السلام والأمن", states: "180", link: "https://legal.un.org/ilc/texts/instruments/arabic/conventions/9_2_1963.pdf" },
-    { name: "اتفاقية حقوق اللاجئين", date: "1951", topic: "حقوق الإنسان", states: "149", link: "https://www.unhcr.org/ar/4b0d189a6.pdf" },
-    { name: "اتفاقية القضاء على جميع أشكال التمييز العنصري", date: "1965", topic: "حقوق الإنسان", states: "182", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-convention-elimination-all-forms-racial-discrimination" },
-    { name: "اتفاقية الأمم المتحدة لمكافحة الجريمة المنظمة", date: "2000", topic: "السلام والأمن", states: "190", link: "https://www.unodc.org/documents/middleeastandnorthafrica/organised-crime/TOC_Convention_Arabic.pdf" },
-    { name: "اتفاقية رامسار بشأن الأراضي الرطبة", date: "1971", topic: "البيئة والمناخ", states: "172", link: "https://www.ramsar.org/sites/default/files/documents/library/current_convention_text_ar.pdf" },
-    { name: "اتفاقية جنيف الخاصة بوضع اللاجئين", date: "1951", topic: "حقوق الإنسان", states: "146", link: "https://www.unhcr.org/ar/4b0d189a6.pdf" },
-    { name: "البروتوكول الاختياري لاتفاقية حقوق الطفل", date: "2000", topic: "حقوق الإنسان", states: "170", link: "https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IV-11-b&chapter=4&clang=_ar" }
+    { name: "اتفاقية حقوق اللاجئين", date: "1951", topic: "حقوق الإنسان", states: "147", link: "https://www.unhcr.org/ar/4b0d189a6.pdf" },
+    { name: "اتفاقية القضاء على جميع أشكال التمييز العنصري", date: "1965", topic: "حقوق الإنسان", states: "182", link: "https://www.ohchr.org/ar/instruments-mechanisms/instruments/international-convention-elimination-all-forms-racial-discrimination" }
 ];
 
 /* ==========================================================================
