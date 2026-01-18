@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.routing.RoutingController"
+            stylesheets="@routing.css">
+    
+    <!-- Header -->
+    <top>
+        <VBox styleClass="header" alignment="CENTER">
+            <Label text="Multi-Criteria Shortest Path Optimizer" styleClass="title"/>
+            <Label text="Dijkstra's Algorithm with Priority Queue" styleClass="subtitle"/>
+        </VBox>
+    </top>
+    
+    <!-- Main Content -->
+    <center>
+        <HBox spacing="20" styleClass="main-content">
+            
+            <!-- Left Panel: Input Controls -->
+            <VBox spacing="15" styleClass="input-panel" HBox.hgrow="ALWAYS">
+                <Label text="Route Configuration" styleClass="section-title"/>
+                
+                <!-- Graph Info -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Graph Status:" styleClass="label"/>
+                    <Label fx:id="graphStatusLabel" text="Not loaded" styleClass="status-label"/>
+                </HBox>
+                
+                <Separator/>
+                
+                <!-- Source Node -->
+                <VBox spacing="5">
+                    <Label text="Source Node:" styleClass="label"/>
+                    <ComboBox fx:id="sourceComboBox" promptText="Select source" maxWidth="Infinity"/>
+                </VBox>
+                
+                <!-- Destination Node -->
+                <VBox spacing="5">
+                    <Label text="Destination Node:" styleClass="label"/>
+                    <ComboBox fx:id="destinationComboBox" promptText="Select destination" maxWidth="Infinity"/>
+                </VBox>
+                
+                <Separator/>
+                
+                <!-- Optimization Choice -->
+                <VBox spacing="10">
+                    <Label text="Optimization Criterion:" styleClass="label"/>
+                    <RadioButton fx:id="distanceRadio" text="1. Shortest Distance (km)" selected="true">
+                        <toggleGroup>
+                            <ToggleGroup fx:id="optimizationGroup"/>
+                        </toggleGroup>
+                    </RadioButton>
+                    <RadioButton fx:id="timeRadio" text="2. Minimum Travel Time (min)" toggleGroup="$optimizationGroup"/>
+                    <RadioButton fx:id="bothRadio" text="3. Both (Distance and Time)" toggleGroup="$optimizationGroup"/>
+                </VBox>
+                
+                <Separator/>
+                
+                <!-- Action Buttons -->
+                <HBox spacing="10">
+                    <Button text="Find Optimal Path" onAction="#onFindPath" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button text="Clear" onAction="#onClear" styleClass="secondary-button"/>
+                </HBox>
+                
+                <Button text="Load Graph from File..." onAction="#onLoadFile" styleClass="secondary-button" maxWidth="Infinity"/>
+                <Button text="Use Sample Graph" onAction="#onUseSampleGraph" styleClass="secondary-button" maxWidth="Infinity"/>
+            </VBox>
+            
+            <!-- Right Panel: Results -->
+            <VBox spacing="15" styleClass="results-panel" HBox.hgrow="ALWAYS">
+                <Label text="Results" styleClass="section-title"/>
+                
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="results-scroll">
+                    <TextArea fx:id="resultsTextArea" 
+                              editable="false" 
+                              wrapText="true"
+                              promptText="Results will appear here..."
+                              styleClass="results-area"/>
+                </ScrollPane>
+                
+                <!-- Path Visualization -->
+                <VBox spacing="5">
+                    <Label text="Optimal Path:" styleClass="label"/>
+                    <Label fx:id="pathLabel" text="-" styleClass="path-display" wrapText="true"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+    
+    <!-- Footer -->
+    <bottom>
+        <HBox styleClass="footer" alignment="CENTER">
+            <Label text="COM336 - Design and Analysis of Algorithms | Project #3 | Semester 2025/2026"/>
+        </HBox>
+    </bottom>
+</BorderPane>
