@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "المرصد القانوني الدولي",
+    "slug": "international-law-observatory",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A365D"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lawobservatory.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A365D"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.lawobservatory.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2fb7d581-d3a7-48e1-959a-5403f7ef4d2b"
+      }
+    }
+  }
+}
