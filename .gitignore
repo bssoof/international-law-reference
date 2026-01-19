@@ -1,6 +1,4 @@
-# Ignore main project src (web app uses dist now)
-/src/
-!mobile-app/src/
+# Dependencies and build artifacts
 
 target/
 pom.xml
