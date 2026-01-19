@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/international-law-reference/sw.js', { scope: '/international-law-reference/' })})}
