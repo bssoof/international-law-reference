@@ -2,347 +2,25 @@
 <html lang="ar" dir="rtl">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المرصد القانوني الدولي • International Law Reference</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>المرصد القانوني الدولي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="header-top">
-        <div class="header-top-content">
-        </div>
-    </div>
-    <div style="display:flex;gap:38px;font-size:12px;">
-        <span>اليوم: <span id="current-date"></span></span>
-        <span>المرجع محدّث: يناير ٢٠٢٦</span>
-    </div>
-    </div>
-    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
 
-    <!-- شريط البحث المتقدم -->
-    <div
-        style="background:white;border-bottom:1px solid var(--gray);padding:18px 0 8px 0;z-index:30;position:sticky;top:0;">
-        <div
-            style="max-width:1380px;margin:auto;padding:0 26px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;">
-            <input id="advanced-search" type="text" placeholder="بحث في كل المرجع... (Ctrl+K)"
-                style="flex:1;min-width:220px;height:44px;border:1.5px solid var(--gray);border-radius:22px;padding:0 18px 0 38px;font-size:15px;background:white;font-family:'Cairo',sans-serif;"
-                onkeyup="performAdvancedSearch()">
-            <select id="filter-topic" onchange="performAdvancedSearch()">
-                <option value="">كل المجالات</option>
-                <option value="حقوق الإنسان">حقوق الإنسان</option>
-                <option value="القانون الإنساني">القانون الإنساني</option>
-                <option value="البيئة والمناخ">البيئة والمناخ</option>
-                <option value="السلام والأمن">السلام والأمن</option>
-                <option value="نزع السلاح">نزع السلاح</option>
-                <option value="القانون البحري">القانون البحري</option>
-            </select>
-            <select id="filter-court" onchange="performAdvancedSearch()">
-                <option value="">كل المحاكم</option>
-                <option value="ICJ">محكمة العدل الدولية</option>
-                <option value="ICC">المحكمة الجنائية الدولية</option>
-                <option value="ECHR">محكمة حقوق الإنسان الأوروبية</option>
-            </select>
-            <input id="filter-year" type="number" min="1900" max="2100" placeholder="السنة"
-                style="width:110px;height:44px;border:1px solid var(--gray);border-radius:22px;padding:0 16px;font-size:14px;"
-                onkeyup="performAdvancedSearch()" onchange="performAdvancedSearch()">
-            <button onclick="clearAdvancedSearch()"
-                style="height:44px;padding:0 22px;border-radius:22px;background:var(--gray);color:var(--dark);font-weight:700;border:none;cursor:pointer;font-size:14px;">مسح</button>
-        </div>
-        <div id="advanced-search-results" style="max-width:1380px;margin:auto;padding:0 26px 8px 26px;display:none;">
-        </div>
-    </div>
-    <!-- نهاية شريط البحث المتقدم -->
-
-    <div class="header-top">
-        <div class="header-top-content">
-            <div class="un-brand">
-                <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-                <div class="un-logo-symbol">UN</div>
-                <span>المرصد القانوني الدولي</span>
-            </div>
-
-            <div class="header-actions-right">
-                <button class="icon-btn" onclick="toggleTheme()" title="تبديل المظهر">🌓</button>
-                <div style="font-size: 12px; opacity: 0.9;">
-                    <span id="current-date"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Overlay -->
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="main-container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <div class="logo-main">مـر</div>
-                <div class="logo-text">
-                    <h1>المرصد<br>القانوني الدولي</h1>
-                    <p>Comprehensive Legal Reference</p>
-                </div>
-            </div>
-
-            <div class="nav-menu" id="nav-menu">
-                <div class="nav-item active" data-tab="treaties" onclick="switchTab('treaties')">
-                    <span class="icon">📜</span>
-                    <span>الاتفاقيات الدولية</span>
-                </div>
-                <div class="nav-item" data-tab="cases" onclick="switchTab('cases')">
-                    <span class="icon">⚖️</span>
-                    <span>السوابق القضائية</span>
-                </div>
-                <div class="nav-item" data-tab="resolutions" onclick="switchTab('resolutions')">
-                    <span class="icon">🗳️</span>
-                    <span>القرارات الدولية</span>
-                </div>
-                <div class="nav-item" data-tab="resources" onclick="switchTab('resources')">
-                    <span class="icon">📚</span>
-                    <span>المصادر والقانون العرفي</span>
-                </div>
-            </div>
-
-            <div class="sidebar-bottom">
-                <div style="padding: 0 4px 6px; font-size:11px; opacity:.85; line-height:1.65;">
-                    مرجع قانوني دولي شامل • معتمد من خبراء القانون الدولي
-                </div>
-                <div style="border-top: 1px solid var(--gray); margin: 19px 0;"></div>
-                <div style="display:flex;justify-content:space-between;padding: 0 4px 4px;font-size: 11px;">
-                    <div>إعدادات</div>
-                    <div>تواصل معنا</div>
-                </div>
-            </div>
-        </aside>
-
-        <div class="content-area">
-            <div class="main-header">
-                <div class="main-header-inner">
-                    <div class="page-title-container" id="page-title-container">
-                        <div class="page-icon" id="page-icon">📜</div>
-                        <div>
-                            <div class="page-title" id="page-title">
-                                <h1>الاتفاقيات الدولية</h1>
-                                <p>مرجع شامل للمعاهدات والاتفاقيات الدولية الملزمة</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="header-actions">
-                        <div class="header-meta">
-                            <div class="meta-item">
-                                <div class="meta-num" id="treatyCount">-</div>
-                                <div>اتفاقية</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-num" id="caseCount">-</div>
-                                <div>سابقة</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content-body">
-                <div class="tab-contents" id="tab-contents">
-
-                    <!-- TREATIES SECTION -->
-                    <div id="treaties-content" class="section-content active">
-                        <div class="section-controls">
-                            <div class="controls-left">
-                                <div class="search-icon">
-                                    <input type="text" id="treaty-search" onkeyup="renderTreaties()"
-                                        placeholder="ابحث عن معاهدة...">
-                                </div>
-                                <select id="topic-filter" onchange="renderTreaties()">
-                                    <option value="الكل">جميع المجالات</option>
-                                    <option value="حقوق الإنسان">حقوق الإنسان</option>
-                                    <option value="القانون الإنساني">القانون الإنساني</option>
-                                    <option value="البيئة">البيئة والمناخ</option>
-                                    <option value="السلام والأمن">السلام والأمن</option>
-                                    <option value="نزع السلاح">نزع السلاح</option>
-                                    <option value="القانون البحري">القانون البحري</option>
-                                </select>
-                                <div style="display:flex;align-items:center;">
-                                    <div class="count-badge" id="treaty-count">-</div>
-                                    <span style="font-size:13px;">معاهدة</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 35%;">اسم الاتفاقية</th>
-                                    <th style="width: 15%;">تاريخ التبني</th>
-                                    <th style="width: 20%;">المجال</th>
-                                    <th style="width: 20%;">الدول الأطراف</th>
-                                    <th>الملف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="treaties-tbody">
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- CASES SECTION -->
-                    <div id="cases-content" class="section-content">
-                        <div class="section-controls">
-                            <div class="controls-left">
-                                <div class="search-icon">
-                                    <input type="text" id="case-search" onkeyup="renderCases()"
-                                        placeholder="ابحث عن قضية...">
-                                </div>
-                                <select id="court-filter" onchange="renderCases()">
-                                    <option value="الكل">جميع المحاكم</option>
-                                    <option value="ICJ">محكمة العدل الدولية</option>
-                                    <option value="ICC">المحكمة الجنائية الدولية</option>
-                                    <option value="ECHR">محكمة حقوق الإنسان الأوروبية</option>
-                                </select>
-                                <div style="display:flex;align-items:center;">
-                                    <div class="count-badge" id="case-count">-</div>
-                                    <span style="font-size:13px;">قضية</span>
-                                </div>
-                                <button id="show-all-cases"
-                                    style="margin-right:18px;padding:7px 18px;border-radius:22px;background:var(--primary);color:white;font-weight:700;border:none;cursor:pointer;font-size:14px;"
-                                    onclick="showAllCases()">عرض الكل</button>
-                            </div>
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 30%;">اسم القضية</th>
-                                    <th style="width: 15%;">المحكمة</th>
-                                    <th style="width: 12%;">السنة</th>
-                                    <th style="width: 28%;">الحكم الرئيسي</th>
-                                    <th>المزيد</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cases-tbody">
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- RESOLUTIONS SECTION -->
-                    <div id="resolutions-content" class="section-content">
-                        <div style="margin: 26px 0 16px;">
-                            <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 8px;">قرارات مجلس الأمن
-                                والجمعية العامة</h2>
-                            <p style="font-size: 14px; color: var(--text-light);">قاعدة بيانات لأهم القرارات الدولية مع
-                                روابط رسمية</p>
-                        </div>
-                        <div class="section-controls">
-                            <div class="controls-left">
-                                <div class="search-icon">
-                                    <input type="text" id="resolution-search" onkeyup="renderResolutions()"
-                                        placeholder="ابحث عن قرار...">
-                                </div>
-                                <select id="resolution-type-filter" onchange="renderResolutions()">
-                                    <option value="الكل">كل الأنواع</option>
-                                    <option value="مجلس الأمن">مجلس الأمن</option>
-                                    <option value="الجمعية العامة">الجمعية العامة</option>
-                                </select>
-                                <input id="resolution-year-filter" type="number" min="1945" max="2100"
-                                    placeholder="السنة"
-                                    style="width:110px;height:44px;border:1px solid var(--gray);border-radius:22px;padding:0 16px;font-size:14px;"
-                                    onkeyup="renderResolutions()" onchange="renderResolutions()">
-                            </div>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 30%;">رقم القرار</th>
-                                    <th style="width: 20%;">النوع</th>
-                                    <th style="width: 15%;">السنة</th>
-                                    <th style="width: 25%;">الموضوع</th>
-                                    <th>الرابط</th>
-                                </tr>
-                            </thead>
-                            <tbody id="resolutions-tbody"></tbody>
-                        </table>
-                    </div>
-                    <!-- RESOURCES SECTION -->
-                    <div id="resources-content" class="section-content">
-                        <div style="margin: 26px 0 16px;">
-                            <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 8px;">المصادر الرسمية والقانون
-                                العرفي</h2>
-                            <p style="font-size: 14px; color: var(--text-light);">روابط مباشرة للمصادر الموثوقة والقاموس
-                                القانوني الدولي</p>
-                        </div>
-
-                        <div
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://www.un.org/en/ga/sixth/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">📜</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">الجمعية العامة للأمم المتحدة</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">جميع القرارات والمعاهدات
-                                    والاتفاقيات الدولية المسجلة</p>
-                            </div>
-
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://treaties.un.org/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">🔗</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">قاعدة بيانات المعاهدات الدولية</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">قاعدة بيانات شاملة لجميع المعاهدات
-                                    المسجلة لدى الأمم المتحدة</p>
-                            </div>
-
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://www.icj-cij.org/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">⚖️</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">محكمة العدل الدولية</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">جميع القضايا والأحكام والفتاوى
-                                    الصادرة عن المحكمة منذ 1946</p>
-                            </div>
-
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://www.icc-cpi.int/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">⚔️</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">المحكمة الجنائية الدولية</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">المحكمة الدائمة الوحيدة للعدالة
-                                    الجنائية الدولية</p>
-                            </div>
-
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://www.icrc.org/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">❤️</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">اللجنة الدولية للصليب الأحمر</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">القانون الدولي الإنساني والمعاهدات
-                                    المتعلقة به</p>
-                            </div>
-
-                            <div style="background: white; border: 1px solid var(--gray); border-radius: 16px; padding: 20px; cursor: pointer;"
-                                onclick="window.open('https://www.ohchr.org/', '_blank')">
-                                <div style="font-size: 28px; margin-bottom: 12px;">🤝</div>
-                                <h3 style="font-weight: 700; margin-bottom: 6px;">مكتب المفوض السامي لحقوق الإنسان</h3>
-                                <p style="font-size: 13px; color: var(--text-light);">المعاهدات والاتفاقيات الدولية
-                                    لحقوق الإنسان</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="main-footer">
-                <div class="footer-inner">
-                    <div style="flex: 1;">
-                        © ٢٠٢٦ المرصد القانوني الدولي — مرجع قانوني شامل
-                    </div>
-                    <div style="max-width: 600px; font-size: 12px; opacity: 0.8;">
-                        هذا المرجع أداة بحثية شاملة تضم معاهدات وقضايا وقرارات دولية • البيانات مستمدة من مصادر رسمية
-                        موثوقة
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Load Data First -->
-    <script src="js/data.js"></script>
-    <!-- Load Main Logic -->
-    <script src="js/main.js"></script>
+    <!-- Legacy Support Force -->
+    <script>
+        if (!window.Promise || !Array.prototype.includes) {
+            document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=default"><\/script>');
+        }
+    </script>
 </body>
 
 </html>

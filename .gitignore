@@ -1,7 +1,12 @@
-src/
+# Ignore main project src (web app uses dist now)
+/src/
+!mobile-app/src/
+
 target/
 pom.xml
 .vscode/
 .idea/
 *.class
 *.log
+node_modules/ 
+.env 

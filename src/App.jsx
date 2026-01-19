@@ -1,24 +1,24 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import {
-    Box, Flex, Heading, Text, VStack, HStack, IconButton, useColorMode, useColorModeValue,
+    Box, Flex, Heading, Text, VStack, IconButton, useColorMode, useColorModeValue,
     Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton,
-    useDisclosure, Input, InputGroup, InputLeftElement, Table, Thead, Tbody, Tr, Th, Td,
-    Badge, Link, Card, CardBody, Show, Hide, Select, SimpleGrid, Skeleton, SkeletonText,
-    Button, ButtonGroup, Wrap, WrapItem, Tag, TagLabel
+    useDisclosure, Badge, Link, Card, CardBody, Button, SimpleGrid,
+    Input, InputGroup, InputLeftElement, Table, Thead, Tbody, Tr, Th, Td, TableContainer
 } from '@chakra-ui/react'
-import { FiMenu, FiSun, FiMoon, FiSearch, FiExternalLink, FiFileText, FiBook, FiAward, FiFolder, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
-import { treatiesData, casesData, resolutionsData, resourcesData, getTopics } from './data'
-import { NotificationButton } from './components/NotificationButton'
-import { UserMenu } from './components/AuthModal'
+// Removing React Icons to prevent mobile crash
+// import { FiMenu ... } from 'react-icons/fi'
+
+import { resourcesData, getTopics } from './data'
 import { useContent } from './hooks/useContent'
 
-// Nav Items
+
+// Nav Items with Emojis instead of Icons
 const navItems = [
-    { id: 'treaties', label: 'الاتفاقيات الدولية', icon: FiFileText },
-    { id: 'cases', label: 'السوابق القضائية', icon: FiBook },
-    { id: 'resolutions', label: 'القرارات الدولية', icon: FiAward },
-    { id: 'resources', label: 'المصادر والمراجع', icon: FiFolder },
+    { id: 'treaties', label: 'الاتفاقيات الدولية', icon: '📄' },
+    { id: 'cases', label: 'السوابق القضائية', icon: '⚖️' },
+    { id: 'resolutions', label: 'القرارات الدولية', icon: '🕊️' },
+    { id: 'resources', label: 'المصادر والمراجع', icon: '📚' },
 ]
 
 // Sidebar Component
@@ -43,20 +43,27 @@ function Sidebar({ activeTab, setActiveTab, onClose }) {
                     _hover={{ bg: activeTab === item.id ? activeBg : hoverBg }}
                     transition="all 0.2s"
                 >
-                    <item.icon />
+                    <Text fontSize="xl">{item.icon}</Text>
                     <span>{item.label}</span>
                 </Box>
             ))}
 
-            {/* Contribute & Notifications */}
             <Box pt={4} mt={4} borderTop="1px" borderColor={useColorModeValue('gray.200', 'gray.700')}>
                 <VStack spacing={2}>
-                    <NotificationButton />
                     <Button as={RouterLink} to="/ai-search" colorScheme="purple" size="sm" width="100%" variant="outline">
                         🤖 البحث الذكي
                     </Button>
                     <Button as={RouterLink} to="/compare" colorScheme="teal" size="sm" width="100%" variant="outline">
                         ⚖️ مقارنة الاتفاقيات
+                    </Button>
+                    <Button as={RouterLink} to="/world-map" colorScheme="blue" size="sm" width="100%" variant="outline">
+                        🗺️ خريطة العالم
+                    </Button>
+                    <Button as={RouterLink} to="/country-compare" colorScheme="orange" size="sm" width="100%" variant="outline">
+                        🏳️ مقارنة الدول
+                    </Button>
+                    <Button as={RouterLink} to="/news" colorScheme="red" size="sm" width="100%" variant="outline">
+                        📰 أخبار حية
                     </Button>
                     <Button as={RouterLink} to="/contribute" colorScheme="brand" size="sm" width="100%">
                         + إضافة محتوى
@@ -78,7 +85,6 @@ function Sidebar({ activeTab, setActiveTab, onClose }) {
     )
 }
 
-// Topic Badge
 function TopicBadge({ topic }) {
     const colorMap = {
         'حقوق الإنسان': 'blue', 'السلام والأمن': 'purple', 'القانون الإنساني': 'red',
@@ -87,386 +93,266 @@ function TopicBadge({ topic }) {
     return <Badge colorScheme={colorMap[topic] || 'gray'} borderRadius="full" px={2}>{topic}</Badge>
 }
 
-// Pagination Hook
 function usePagination(data, itemsPerPage = 8) {
-    const [page, setPage] = useState(1)
-    const totalPages = Math.ceil(data.length / itemsPerPage)
-    const paginatedData = useMemo(() => {
-        const start = (page - 1) * itemsPerPage
-        return data.slice(start, start + itemsPerPage)
-    }, [data, page, itemsPerPage])
+    const [currentPage, setCurrentPage] = useState(1)
+    const maxPage = Math.ceil(data.length / itemsPerPage)
+    const currentData = useMemo(() => {
+        const begin = (currentPage - 1) * itemsPerPage
+        const end = begin + itemsPerPage
+        return data.slice(begin, end)
+    }, [data, currentPage, itemsPerPage])
 
-    useEffect(() => { setPage(1) }, [data.length])
+    useEffect(() => setCurrentPage(1), [data.length])
 
-    return { paginatedData, page, setPage, totalPages, total: data.length }
+    const next = () => setCurrentPage(p => Math.min(p + 1, maxPage))
+    const prev = () => setCurrentPage(p => Math.max(p - 1, 1))
+
+    return { next, prev, jump: setCurrentPage, currentData, currentPage, maxPage }
 }
 
-// Pagination Component
-function Pagination({ page, setPage, totalPages, total }) {
-    if (totalPages <= 1) return null
-    return (
-        <Flex justify="space-between" align="center" mt={6} flexWrap="wrap" gap={2}>
-            <Text fontSize="sm" color="gray.500">عرض {total} نتيجة</Text>
-            <ButtonGroup size="sm" variant="outline">
-                <IconButton icon={<FiChevronRight />} onClick={() => setPage(p => Math.max(1, p - 1))} isDisabled={page === 1} />
-                {[...Array(totalPages)].map((_, i) => (
-                    <Button key={i} onClick={() => setPage(i + 1)} variant={page === i + 1 ? 'solid' : 'outline'} colorScheme={page === i + 1 ? 'brand' : 'gray'}>
-                        {i + 1}
-                    </Button>
-                ))}
-                <IconButton icon={<FiChevronLeft />} onClick={() => setPage(p => Math.min(totalPages, p + 1))} isDisabled={page === totalPages} />
-            </ButtonGroup>
-        </Flex>
-    )
-}
+function ListView({ data, activeTab }) {
+    const borderColor = useColorModeValue('gray.200', 'gray.700')
 
-// Skeleton Loader
-function TableSkeleton() {
     return (
-        <VStack spacing={4} align="stretch">
-            {[...Array(5)].map((_, i) => (
-                <Card key={i} variant="outline">
-                    <CardBody>
-                        <Skeleton height="20px" width="70%" mb={2} />
-                        <SkeletonText noOfLines={2} spacing={2} />
-                    </CardBody>
-                </Card>
-            ))}
-        </VStack>
-    )
-}
-
-// Filter Bar
-function FilterBar({ searchQuery, setSearchQuery, topicFilter, setTopicFilter, yearFilter, setYearFilter, topics }) {
-    return (
-        <Wrap spacing={3} mb={6} align="center">
-            <WrapItem flex={{ base: '1 1 100%', md: '1 1 auto' }} maxW={{ md: '300px' }}>
-                <InputGroup>
-                    <InputLeftElement pointerEvents="none"><FiSearch color="gray" /></InputLeftElement>
-                    <Input placeholder="بحث..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} borderRadius="lg" />
-                </InputGroup>
-            </WrapItem>
-            <WrapItem>
-                <Select placeholder="جميع المجالات" value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} borderRadius="lg" minW="150px">
-                    {topics.map(t => <option key={t} value={t}>{t}</option>)}
-                </Select>
-            </WrapItem>
-            <WrapItem>
-                <Select placeholder="جميع السنوات" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} borderRadius="lg" minW="130px">
-                    {['2024', '2023', '2020-2022', '2010-2019', '2000-2009', '1990-1999', '1980-1989', 'قبل 1980'].map(y => (
-                        <option key={y} value={y}>{y}</option>
+        <TableContainer bg={useColorModeValue('white', 'gray.800')} borderRadius="lg" border="1px" borderColor={borderColor}>
+            <Table variant="simple">
+                <Thead>
+                    <Tr>
+                        <Th textAlign="right">
+                            {activeTab === 'resolutions' ? 'رقم القرار' : (activeTab === 'cases' ? 'اسم القضية' : 'الاسم/العنوان')}
+                        </Th>
+                        <Th textAlign="right">السنة/التاريخ</Th>
+                        <Th textAlign="right">المجال/الجهة</Th>
+                        <Th textAlign="right">التفاصيل</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {data.map((item) => (
+                        <Tr key={item.id} _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }} transition="all 0.2s">
+                            <Td fontWeight="bold">
+                                <Link
+                                    as={activeTab !== 'resources' ? RouterLink : Link}
+                                    to={activeTab !== 'resources' ? `/${activeTab.slice(0, -1).replace('resolutions', 'resolution').replace('treaties', 'treaty').replace('cases', 'case')}/${item.id}` : undefined}
+                                    href={activeTab === 'resources' ? item.url : undefined}
+                                    isExternal={activeTab === 'resources'}
+                                    _hover={{ textDecoration: 'none', color: 'brand.500' }}
+                                >
+                                    {item.name || item.title || item.number}
+                                </Link>
+                                {item.isNew && <Badge ml={2} colorScheme="green" variant="solid" fontSize="0.6em">جديد</Badge>}
+                            </Td>
+                            <Td>{item.date || item.year}</Td>
+                            <Td>
+                                <TopicBadge topic={item.topic || item.category || item.type || 'عام'} />
+                            </Td>
+                            <Td color="gray.500" fontSize="sm" maxW="300px" isTruncated>
+                                {item.description || item.summary || item.subject}
+                            </Td>
+                        </Tr>
                     ))}
-                </Select>
-            </WrapItem>
-            {(topicFilter || yearFilter) && (
-                <WrapItem>
-                    <Button size="sm" variant="ghost" onClick={() => { setTopicFilter(''); setYearFilter(''); }}>مسح الفلاتر</Button>
-                </WrapItem>
-            )}
-        </Wrap>
+                </Tbody>
+            </Table>
+        </TableContainer>
     )
 }
 
-// Treaties Section
-function TreatiesSection({ data = [], loading }) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [topicFilter, setTopicFilter] = useState('')
-    const [yearFilter, setYearFilter] = useState('')
-    const cardBg = useColorModeValue('white', 'gray.800')
-    const topics = useMemo(() => getTopics(), [])
-
-    const filtered = useMemo(() => {
-        return data.filter(t => {
-            const matchesSearch = t.name.includes(searchQuery) || t.topic.includes(searchQuery)
-            const matchesTopic = !topicFilter || t.topic === topicFilter
-            const matchesYear = !yearFilter || filterByYear(t.date, yearFilter)
-            return matchesSearch && matchesTopic && matchesYear
-        })
-    }, [searchQuery, topicFilter, yearFilter, data])
-
-    const { paginatedData, page, setPage, totalPages, total } = usePagination(filtered)
-
-    if (loading) return <TableSkeleton />
-
-    return (
-        <>
-            <FilterBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} topicFilter={topicFilter} setTopicFilter={setTopicFilter} yearFilter={yearFilter} setYearFilter={setYearFilter} topics={topics} />
-
-            <Hide below="md">
-                <Box bg={cardBg} borderRadius="xl" overflow="hidden" boxShadow="sm" border="1px" borderColor={useColorModeValue('gray.200', 'gray.700')}>
-                    <Table variant="simple">
-                        <Thead bg={useColorModeValue('gray.50', 'gray.700')}>
-                            <Tr><Th>الاتفاقية</Th><Th>السنة</Th><Th>المجال</Th><Th>الدول</Th><Th>الرابط</Th></Tr>
-                        </Thead>
-                        <Tbody>
-                            {paginatedData.map((t) => (
-                                <Tr key={t.id} _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
-                                    <Td fontWeight="600" maxW="400px"><Text noOfLines={2}>{t.name}</Text></Td>
-                                    <Td>{t.date}</Td>
-                                    <Td><TopicBadge topic={t.topic} /></Td>
-                                    <Td>{t.states} دولة</Td>
-                                    <Td><RouterLink to={`/treaty/${t.id}`}><Link as="span" color="brand.600" fontWeight="600">تفاصيل <FiExternalLink style={{ display: 'inline' }} /></Link></RouterLink></Td>
-                                </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
-                </Box>
-            </Hide>
-
-            <Show below="md">
-                <VStack spacing={3} align="stretch">
-                    {paginatedData.map((t) => (
-                        <Card key={t.id} size="sm" variant="outline">
-                            <CardBody>
-                                <Text fontWeight="700" color="brand.600" mb={2}>{t.name}</Text>
-                                <HStack justify="space-between" mb={2}>
-                                    <Text fontSize="sm" color="gray.500">📅 {t.date}</Text>
-                                    <Text fontSize="sm" color="gray.500">🌍 {t.states} دولة</Text>
-                                </HStack>
-                                <HStack justify="space-between">
-                                    <TopicBadge topic={t.topic} />
-                                    <RouterLink to={`/treaty/${t.id}`}><Link as="span" color="brand.600" fontWeight="600" fontSize="sm">تفاصيل ↗</Link></RouterLink>
-                                </HStack>
-                            </CardBody>
-                        </Card>
-                    ))}
-                </VStack>
-            </Show>
-
-            <Pagination page={page} setPage={setPage} totalPages={totalPages} total={total} />
-        </>
-    )
-}
-
-// Cases Section
-function CasesSection({ data = [], loading }) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [courtFilter, setCourtFilter] = useState('')
-    const cardBg = useColorModeValue('white', 'gray.800')
-
-    const filtered = useMemo(() => {
-        return data.filter(c => {
-            const matchesSearch = c.name.includes(searchQuery) || c.summary.includes(searchQuery)
-            const matchesCourt = !courtFilter || c.court === courtFilter
-            return matchesSearch && matchesCourt
-        })
-    }, [searchQuery, courtFilter, data])
-
-    const { paginatedData, page, setPage, totalPages, total } = usePagination(filtered)
-
-    if (loading) return <TableSkeleton />
-
-    return (
-        <>
-            <Wrap spacing={3} mb={6}>
-                <WrapItem flex={{ base: '1 1 100%', md: '1 1 auto' }} maxW={{ md: '300px' }}>
-                    <InputGroup>
-                        <InputLeftElement pointerEvents="none"><FiSearch color="gray" /></InputLeftElement>
-                        <Input placeholder="بحث في القضايا..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} borderRadius="lg" />
-                    </InputGroup>
-                </WrapItem>
-                <WrapItem>
-                    <Select placeholder="جميع المحاكم" value={courtFilter} onChange={(e) => setCourtFilter(e.target.value)} borderRadius="lg">
-                        <option value="ICJ">محكمة العدل الدولية (ICJ)</option>
-                        <option value="ICC">المحكمة الجنائية الدولية (ICC)</option>
-                        <option value="ECHR">المحكمة الأوروبية (ECHR)</option>
-                    </Select>
-                </WrapItem>
-            </Wrap>
-
-            <VStack spacing={3} align="stretch">
-                {paginatedData.map((c) => (
-                    <Card key={c.id} variant="outline">
-                        <CardBody>
-                            <HStack justify="space-between" mb={2} flexWrap="wrap">
-                                <Text fontWeight="700" flex={1}>{c.name}</Text>
-                                <HStack>
-                                    <Badge colorScheme="blue">{c.court}</Badge>
-                                    <Text fontSize="sm" color="gray.500">{c.year}</Text>
-                                </HStack>
-                            </HStack>
-                            <Text fontSize="sm" color="gray.500" noOfLines={3} mb={3}>{c.summary}</Text>
-                            <RouterLink to={`/case/${c.id}`}><Link as="span" color="brand.600" fontWeight="600" fontSize="sm">عرض التفاصيل ↗</Link></RouterLink>
-                        </CardBody>
-                    </Card>
-                ))}
-            </VStack>
-
-            <Pagination page={page} setPage={setPage} totalPages={totalPages} total={total} />
-        </>
-    )
-}
-
-// Resolutions Section
-function ResolutionsSection({ data = [], loading }) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [typeFilter, setTypeFilter] = useState('')
-
-    const filtered = useMemo(() => {
-        return data.filter(r => {
-            const matchesSearch = r.number.includes(searchQuery) || r.subject.includes(searchQuery)
-            const matchesType = !typeFilter || r.type.includes(typeFilter)
-            return matchesSearch && matchesType
-        })
-    }, [searchQuery, typeFilter, data])
-
-    const { paginatedData, page, setPage, totalPages, total } = usePagination(filtered)
-
-    if (loading) return <TableSkeleton />
-
-    return (
-        <>
-            <Wrap spacing={3} mb={6}>
-                <WrapItem flex={{ base: '1 1 100%', md: '1 1 auto' }} maxW={{ md: '300px' }}>
-                    <InputGroup>
-                        <InputLeftElement pointerEvents="none"><FiSearch color="gray" /></InputLeftElement>
-                        <Input placeholder="بحث برقم القرار..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} borderRadius="lg" />
-                    </InputGroup>
-                </WrapItem>
-                <WrapItem>
-                    <Select placeholder="جميع الجهات" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} borderRadius="lg">
-                        <option value="مجلس الأمن">مجلس الأمن</option>
-                        <option value="الجمعية العامة">الجمعية العامة</option>
-                    </Select>
-                </WrapItem>
-            </Wrap>
-
-            <VStack spacing={3} align="stretch">
-                {paginatedData.map((r) => (
-                    <Card key={r.id} variant="outline">
-                        <CardBody>
-                            <HStack justify="space-between" mb={2}>
-                                <Text fontWeight="800" fontFamily="mono" color="brand.600">{r.number}</Text>
-                                <HStack>
-                                    <Badge colorScheme={r.type.includes('الأمن') ? 'red' : 'green'}>{r.type}</Badge>
-                                    <Text fontSize="sm" color="gray.500">{r.year}</Text>
-                                </HStack>
-                            </HStack>
-                            <Text fontSize="sm" mb={2}>{r.subject}</Text>
-                            <Link href={r.link} isExternal color="brand.600" fontWeight="600" fontSize="sm">عرض النص الكامل ↗</Link>
-                        </CardBody>
-                    </Card>
-                ))}
-            </VStack>
-
-            <Pagination page={page} setPage={setPage} totalPages={totalPages} total={total} />
-        </>
-    )
-}
-
-// Resources Section
-function ResourcesSection() {
-    const [loading, setLoading] = useState(true)
-    const categories = [...new Set(resourcesData.map(r => r.category))]
-
-    useEffect(() => { setTimeout(() => setLoading(false), 300) }, [])
-
-    if (loading) return <TableSkeleton />
-
-    return (
-        <VStack spacing={8} align="stretch">
-            {categories.map(cat => (
-                <Box key={cat}>
-                    <Heading size="md" mb={4} color="brand.600">{cat}</Heading>
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-                        {resourcesData.filter(r => r.category === cat).map(resource => (
-                            <Card key={resource.id} variant="outline" _hover={{ borderColor: 'brand.500', shadow: 'md', transform: 'translateY(-2px)' }} transition="all 0.2s" cursor="pointer" as="a" href={resource.url} target="_blank">
-                                <CardBody>
-                                    <HStack mb={3}>
-                                        <Text fontSize="2xl">{resource.icon}</Text>
-                                        <Heading size="sm">{resource.name}</Heading>
-                                    </HStack>
-                                    <Text fontSize="sm" color="gray.500" noOfLines={3}>{resource.description}</Text>
-                                </CardBody>
-                            </Card>
-                        ))}
-                    </SimpleGrid>
-                </Box>
-            ))}
-        </VStack>
-    )
-}
-
-// Year Filter Helper
-function filterByYear(dateStr, filter) {
-    const year = parseInt(dateStr)
-    if (!year) return false
-    if (filter === '2024') return year === 2024
-    if (filter === '2023') return year === 2023
-    if (filter === '2020-2022') return year >= 2020 && year <= 2022
-    if (filter === '2010-2019') return year >= 2010 && year <= 2019
-    if (filter === '2000-2009') return year >= 2000 && year <= 2009
-    if (filter === '1990-1999') return year >= 1990 && year <= 1999
-    if (filter === '1980-1989') return year >= 1980 && year <= 1989
-    if (filter === 'قبل 1980') return year < 1980
-    return true
-}
-
-// Main App
 export default function App() {
-    const [activeTab, setActiveTab] = useState('treaties')
-    const { colorMode, toggleColorMode } = useColorMode()
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const headerBg = useColorModeValue('white', 'gray.800')
-    const sidebarBg = useColorModeValue('white', 'gray.800')
+    const { colorMode, toggleColorMode } = useColorMode()
+    const [activeTab, setActiveTab] = useState('treaties')
+    const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
+    const [searchQuery, setSearchQuery] = useState('')
 
-    // Fetch Dynamic Content
-    const { treaties, cases, resolutions, loading } = useContent()
+    // Get deduplicated data from hook
+    const { treaties, cases, resolutions, loading, isNew } = useContent()
 
-    const tabTitles = {
-        treaties: { title: 'الاتفاقيات الدولية', desc: 'مرجع شامل للمعاهدات والاتفاقيات الدولية الملزمة' },
-        cases: { title: 'السوابق القضائية', desc: 'أحكام وقضايا من المحاكم الدولية (ICJ, ICC, ECHR)' },
-        resolutions: { title: 'القرارات الدولية', desc: 'قرارات مجلس الأمن والجمعية العامة' },
-        resources: { title: 'المصادر والمراجع', desc: 'روابط مباشرة للمصادر الدولية الموثوقة' },
+    const filterData = (data) => {
+        if (!data) return []
+        const lowerQuery = searchQuery.toLowerCase()
+        return data.filter(item => {
+            const name = item.name || item.title || item.number || ''
+            const desc = item.description || item.summary || item.subject || ''
+            const topic = item.topic || item.category || item.type || ''
+            return (
+                name.toLowerCase().includes(lowerQuery) ||
+                desc.toLowerCase().includes(lowerQuery) ||
+                topic.toLowerCase().includes(lowerQuery)
+            )
+        })
     }
 
+    const filteredData = useMemo(() => {
+        switch (activeTab) {
+            case 'treaties': return filterData(treaties)
+            case 'cases': return filterData(cases)
+            case 'resolutions': return filterData(resolutions)
+            case 'resources': return resourcesData
+            default: return []
+        }
+    }, [activeTab, searchQuery, treaties, cases, resolutions])
+
+    const { next, prev, currentData, currentPage, maxPage } = usePagination(filteredData)
+    const cardBg = useColorModeValue('white', 'gray.800')
+
     return (
-        <Box minH="100vh">
-            {/* Header */}
-            <Box as="header" bg={headerBg} borderBottom="1px" borderColor={useColorModeValue('gray.200', 'gray.700')} position="sticky" top={0} zIndex={10} px={4} py={3}>
-                <Flex align="center" justify="space-between" maxW="1400px" mx="auto">
-                    <HStack spacing={3}>
-                        <Hide above="md">
-                            <IconButton icon={<FiMenu />} onClick={onOpen} variant="ghost" aria-label="Open menu" />
-                        </Hide>
-                        <HStack>
-                            <Box bg="brand.600" color="white" p={2} borderRadius="lg" fontWeight="800" fontSize="sm">UN</Box>
-                            <Show above="sm"><Text fontWeight="700" color="brand.600">المرصد القانوني الدولي</Text></Show>
-                        </HStack>
-                    </HStack>
-                    <IconButton icon={colorMode === 'light' ? <FiMoon /> : <FiSun />} onClick={toggleColorMode} variant="ghost" aria-label="Toggle color mode" />
-                    <UserMenu />
+        <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
+            <Flex
+                as="nav" align="center" justify="space-between" wrap="wrap"
+                padding="1rem" bg={useColorModeValue('white', 'gray.800')}
+                color={useColorModeValue('gray.600', 'white')}
+                borderBottom="1px" borderColor={useColorModeValue('gray.200', 'gray.700')}
+                position="sticky" top="0" zIndex="sticky"
+            >
+                <Flex align="center">
+                    <IconButton
+                        display={{ base: 'flex', md: 'none' }}
+                        onClick={onOpen}
+                        icon={<span>☰</span>} // Emoji replacement
+                        variant="ghost"
+                        aria-label="Open Menu"
+                        mr={2}
+                    />
+                    <Heading size="md" display={{ base: 'none', md: 'block' }}>المرصد القانوني (v2.0)</Heading>
+
+                    <InputGroup maxW="400px" mr={8} display={{ base: 'none', md: 'block' }}>
+                        <InputLeftElement pointerEvents="none"><span>🔍</span></InputLeftElement>
+                        <Input
+                            placeholder="بحث سريع..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            borderRadius="full"
+                        />
+                    </InputGroup>
                 </Flex>
-            </Box>
 
-            {/* Mobile Drawer */}
-            <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader borderBottomWidth="1px">القائمة</DrawerHeader>
-                    <DrawerBody p={0}><Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onClose={onClose} /></DrawerBody>
-                </DrawerContent>
-            </Drawer>
+                <Flex align="center" gap={2}>
+                    <IconButton
+                        onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                        icon={viewMode === 'grid' ? <span>🧾</span> : <span>🖼️</span>}
+                        variant="ghost"
+                        fontSize="xl"
+                        aria-label="Switch View"
+                        title={viewMode === 'grid' ? "عرض كجدول" : "عرض كشبكة"}
+                    />
+                    <IconButton
+                        onClick={toggleColorMode}
+                        icon={colorMode === 'light' ? <span>🌙</span> : <span>☀️</span>}
+                        variant="ghost"
+                        isRound
+                        aria-label="Toggle Theme"
+                    />
+                </Flex>
+            </Flex>
 
-            {/* Main Layout */}
             <Flex>
-                <Hide below="md">
-                    <Box as="aside" w="280px" bg={sidebarBg} borderLeft="1px" borderColor={useColorModeValue('gray.200', 'gray.700')} minH="calc(100vh - 60px)" position="sticky" top="60px">
-                        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-                    </Box>
-                </Hide>
+                <Box
+                    display={{ base: 'none', md: 'block' }}
+                    w="280px"
+                    minH="calc(100vh - 73px)"
+                    bg={useColorModeValue('white', 'gray.800')}
+                    borderLeft="1px" borderColor={useColorModeValue('gray.200', 'gray.700')}
+                >
+                    <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+                </Box>
 
-                <Box flex={1} p={{ base: 4, md: 8 }}>
-                    <Box mb={6}>
-                        <Heading size="lg" mb={2}>{tabTitles[activeTab].title}</Heading>
-                        <Text color="gray.500">{tabTitles[activeTab].desc}</Text>
+                <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+                    <DrawerOverlay />
+                    <DrawerContent bg={useColorModeValue('white', 'gray.800')}>
+                        <DrawerCloseButton />
+                        <DrawerHeader borderBottomWidth="1px">القائمة</DrawerHeader>
+                        <DrawerBody p={0}>
+                            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onClose={onClose} />
+                        </DrawerBody>
+                    </DrawerContent>
+                </Drawer>
+
+                <Box flex="1" p={{ base: 4, md: 8 }}>
+                    <Box display={{ base: 'block', md: 'none' }} mb={6}>
+                        <InputGroup size="lg">
+                            <InputLeftElement pointerEvents="none"><span>🔍</span></InputLeftElement>
+                            <Input
+                                placeholder="بحث..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                borderRadius="full"
+                                bg={useColorModeValue('white', 'gray.700')}
+                            />
+                        </InputGroup>
                     </Box>
 
-                    {activeTab === 'treaties' && <TreatiesSection data={treaties} loading={loading} />}
-                    {activeTab === 'cases' && <CasesSection data={cases} loading={loading} />}
-                    {activeTab === 'resolutions' && <ResolutionsSection data={resolutions} loading={loading} />}
-                    {activeTab === 'resources' && <ResourcesSection />}
+                    <Flex justify="space-between" align="center" mb={6}>
+                        <Heading size="lg">
+                            {navItems.find(i => i.id === activeTab)?.label}
+                            <Badge ml={2} colorScheme="brand" fontSize="md" borderRadius="full">
+                                {filteredData.length}
+                            </Badge>
+                        </Heading>
+                    </Flex>
+
+                    {viewMode === 'list' ? (
+                        <ListView data={currentData} activeTab={activeTab} />
+                    ) : (
+                        <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={6}>
+                            {currentData.map((item) => (
+                                <Card
+                                    key={item.id}
+                                    bg={cardBg}
+                                    shadow="sm"
+                                    _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
+                                    transition="all 0.2s"
+                                    as={activeTab !== 'resources' ? RouterLink : Link}
+                                    to={(() => {
+                                        if (activeTab === 'resources') return undefined
+                                        const map = { 'treaties': 'treaty', 'cases': 'case', 'resolutions': 'resolution' }
+                                        return `/${map[activeTab]}/${item.id}`
+                                    })()}
+                                    href={activeTab === 'resources' ? item.url : undefined}
+                                    isExternal={activeTab === 'resources'}
+                                >
+                                    <CardBody>
+                                        <VStack align="start" spacing={3}>
+                                            <TopicBadge topic={item.topic || item.category || item.type || 'عام'} />
+                                            <Heading size="md" noOfLines={2}>{item.name || item.title || item.number}</Heading>
+                                            <Text fontSize="sm" color="gray.500" noOfLines={3}>
+                                                {item.description || item.summary || item.subject || 'انقر للتفاصيل...'}
+                                            </Text>
+
+                                            <Box pt={2} w="100%" display="flex" justifyContent="space-between" alignItems="center">
+                                                <Text fontSize="xs" color="gray.400">{item.date || item.year}</Text>
+                                                {isNew(item.date) && <Badge colorScheme="green" variant="subtle">جديد</Badge>}
+                                            </Box>
+                                        </VStack>
+                                    </CardBody>
+                                </Card>
+                            ))}
+                        </SimpleGrid>
+                    )}
+
+                    {filteredData.length === 0 && (
+                        <Box textAlign="center" py={10}>
+                            <Text fontSize="lg" color="gray.500">لا توجد نتائج مطابقة لبحثك.</Text>
+                        </Box>
+                    )}
+
+                    {filteredData.length > 8 && (
+                        <Flex justify="center" align="center" mt={8} gap={4}>
+                            <IconButton
+                                icon={<span>➡️</span>}
+                                onClick={prev}
+                                isDisabled={currentPage === 1}
+                                isRound
+                                variant="outline"
+                            />
+                            <Text fontWeight="bold">صفحة {currentPage} من {maxPage}</Text>
+                            <IconButton
+                                icon={<span>⬅️</span>}
+                                onClick={next}
+                                isDisabled={currentPage === maxPage}
+                                isRound
+                                variant="outline"
+                            />
+                        </Flex>
+                    )}
                 </Box>
             </Flex>
         </Box>
