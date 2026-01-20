@@ -1,16 +1,23 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import {
-    Box, Flex, Heading, Text, VStack, IconButton, useColorMode, useColorModeValue,
+    Box, Flex, Heading, Text, VStack, HStack, IconButton, useColorMode, useColorModeValue,
     Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton,
-    useDisclosure, Badge, Link, Card, CardBody, Button, SimpleGrid,
-    Input, InputGroup, InputLeftElement, Table, Thead, Tbody, Tr, Th, Td, TableContainer
+    useDisclosure, Badge, Link, Card, CardBody, Button, SimpleGrid, Select,
+    Input, InputGroup, InputLeftElement, Table, Thead, Tbody, Tr, Th, Td, TableContainer,
+    Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverBody, PopoverArrow,
+    Stat, StatLabel, StatNumber, StatGroup, Progress, Collapse, Divider
 } from '@chakra-ui/react'
 // Removing React Icons to prevent mobile crash
 // import { FiMenu ... } from 'react-icons/fi'
 
 import { resourcesData, getTopics } from './data'
 import { useContent } from './hooks/useContent'
+import { useDebounce } from './hooks/useDebounce'
+import { useAuth } from './hooks/useAuth'
+import StatsPanel from './components/StatsPanel'
+import AuthModal from './components/AuthModal'
+import html2pdf from 'html2pdf.js'
 
 
 // Nav Items with Emojis instead of Icons
@@ -19,6 +26,7 @@ const navItems = [
     { id: 'cases', label: 'السوابق القضائية', icon: '⚖️' },
     { id: 'resolutions', label: 'القرارات الدولية', icon: '🕊️' },
     { id: 'resources', label: 'المصادر والمراجع', icon: '📚' },
+    { id: 'favorites', label: 'مفضلاتي', icon: '❤️' },
 ]
 
 // Sidebar Component
@@ -163,22 +171,87 @@ export default function App() {
     const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list'
     const [searchQuery, setSearchQuery] = useState('')
 
+    // Advanced Filters
+    const [topicFilter, setTopicFilter] = useState('')
+    const [yearFrom, setYearFrom] = useState('')
+    const [yearTo, setYearTo] = useState('')
+    const [showFilters, setShowFilters] = useState(false)
+    const [showStats, setShowStats] = useState(false)
+
+    // Debounce high-frequency inputs
+    const debouncedSearch = useDebounce(searchQuery, 300)
+    const debouncedYearFrom = useDebounce(yearFrom, 300)
+    const debouncedYearTo = useDebounce(yearTo, 300)
+
+    // Auth
+    const { user, favorites, toggleFavorite, signOut } = useAuth()
+    const [isAuthOpen, setAuthOpen] = useState(false)
+
+
+
+
     // Get deduplicated data from hook
     const { treaties, cases, resolutions, loading, isNew } = useContent()
 
+    // Get unique topics for filter dropdown
+    const allTopics = useMemo(() => {
+        const topics = new Set()
+            ;[...treaties, ...cases, ...resolutions].forEach(item => {
+                const topic = item.topic || item.category || item.type
+                if (topic) topics.add(topic)
+            })
+        return Array.from(topics).sort()
+    }, [treaties, cases, resolutions])
+
+    // Get recent items for notifications (last 30 days simulated by year 2024+)
+    const recentItems = useMemo(() => {
+        return [...treaties, ...cases, ...resolutions]
+            .filter(item => {
+                const year = parseInt(item.date || item.year)
+                return year >= 2023
+            })
+            .slice(0, 5)
+    }, [treaties, cases, resolutions])
+
     const filterData = (data) => {
         if (!data) return []
-        const lowerQuery = searchQuery.toLowerCase()
+
         return data.filter(item => {
             const name = item.name || item.title || item.number || ''
             const desc = item.description || item.summary || item.subject || ''
             const topic = item.topic || item.category || item.type || ''
-            return (
-                name.toLowerCase().includes(lowerQuery) ||
-                desc.toLowerCase().includes(lowerQuery) ||
-                topic.toLowerCase().includes(lowerQuery)
-            )
+            // Improved Year Parsing
+            const dateStr = (item.date || item.year || '').toString()
+            const yearMatch = dateStr.match(/\d{4}/)
+            const year = yearMatch ? parseInt(yearMatch[0]) : 0
+
+            // Text search
+            const matchesSearch = !debouncedSearch ||
+                name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                desc.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                topic.toLowerCase().includes(debouncedSearch.toLowerCase())
+
+            // Topic filter
+            const matchesTopic = !topicFilter || topic === topicFilter
+
+            // Year range filter
+            const matchesYearFrom = !debouncedYearFrom || (year > 0 && year >= parseInt(debouncedYearFrom))
+            const matchesYearTo = !debouncedYearTo || (year > 0 && year <= parseInt(debouncedYearTo))
+
+            return matchesSearch && matchesTopic && matchesYearFrom && matchesYearTo
         })
+    }
+
+    const exportPDF = () => {
+        const element = document.getElementById('content-to-export')
+        const opt = {
+            margin: 1,
+            filename: 'legal-observatory-data.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        }
+        html2pdf().set(opt).from(element).save()
     }
 
     const filteredData = useMemo(() => {
@@ -187,9 +260,10 @@ export default function App() {
             case 'cases': return filterData(cases)
             case 'resolutions': return filterData(resolutions)
             case 'resources': return resourcesData
+            case 'favorites': return filterData([...treaties, ...cases, ...resolutions].filter(item => favorites.includes(String(item.id))))
             default: return []
         }
-    }, [activeTab, searchQuery, treaties, cases, resolutions])
+    }, [activeTab, debouncedSearch, topicFilter, debouncedYearFrom, debouncedYearTo, treaties, cases, resolutions])
 
     const { next, prev, currentData, currentPage, maxPage } = usePagination(filteredData)
     const cardBg = useColorModeValue('white', 'gray.800')
@@ -226,6 +300,53 @@ export default function App() {
                 </Flex>
 
                 <Flex align="center" gap={2}>
+                    {/* Notification Bell */}
+                    <Popover placement='bottom-end'>
+                        <PopoverTrigger>
+                            <Box position="relative" cursor="pointer" mr={2}>
+                                <IconButton
+                                    icon={<span>🔔</span>}
+                                    variant="ghost"
+                                    isRound
+                                    aria-label="Notifications"
+                                />
+                                <Badge
+                                    position="absolute" top="-1px" right="-1px"
+                                    colorScheme="red" borderRadius="full" fontSize="0.6em"
+                                >
+                                    {recentItems.length}
+                                </Badge>
+                            </Box>
+                        </PopoverTrigger>
+                        <PopoverContent bg={useColorModeValue('white', 'gray.800')} borderColor={useColorModeValue('gray.200', 'gray.600')}>
+                            <PopoverArrow />
+                            <PopoverHeader fontWeight="bold" borderBottomWidth="1px">آخر التحديثات</PopoverHeader>
+                            <PopoverBody p={0}>
+                                <VStack align="stretch" spacing={0}>
+                                    {recentItems.map((item, i) => (
+                                        <Box key={i} p={3} _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }} borderBottomWidth={i < recentItems.length - 1 ? "1px" : "0"}>
+                                            <Flex justify="space-between" align="center" mb={1}>
+                                                <Badge colorScheme="green" fontSize="xs">جديد</Badge>
+                                                <Text fontSize="xs" color="gray.500">{item.date || item.year}</Text>
+                                            </Flex>
+                                            <Text fontSize="sm" noOfLines={2}>{item.name || item.title || item.number}</Text>
+                                        </Box>
+                                    ))}
+                                </VStack>
+                            </PopoverBody>
+                        </PopoverContent>
+                    </Popover>
+
+                    <Button
+                        size="sm"
+                        leftIcon={<span>⬇️</span>}
+                        onClick={exportPDF}
+                        display={{ base: 'none', lg: 'flex' }}
+                        colorScheme="gray" variant="outline"
+                    >
+                        PDF
+                    </Button>
+
                     <IconButton
                         onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                         icon={viewMode === 'grid' ? <span>🧾</span> : <span>🖼️</span>}
@@ -242,7 +363,29 @@ export default function App() {
                         aria-label="Toggle Theme"
                     />
                 </Flex>
+
+                <Flex align="center" gap={2}>
+                    {user ? (
+                        <Button
+                            size="sm"
+                            colorScheme="red"
+                            variant="ghost"
+                            onClick={signOut}
+                        >
+                            خروج ({user.email.split('@')[0]})
+                        </Button>
+                    ) : (
+                        <Button
+                            size="sm"
+                            colorScheme="brand"
+                            onClick={() => setAuthOpen(true)}
+                        >
+                            دخول
+                        </Button>
+                    )}
+                </Flex>
             </Flex>
+
 
             <Flex>
                 <Box
@@ -280,53 +423,144 @@ export default function App() {
                         </InputGroup>
                     </Box>
 
-                    <Flex justify="space-between" align="center" mb={6}>
+                    <Flex justify="space-between" align="center" mb={6} wrap="wrap" gap={4}>
                         <Heading size="lg">
                             {navItems.find(i => i.id === activeTab)?.label}
                             <Badge ml={2} colorScheme="brand" fontSize="md" borderRadius="full">
                                 {filteredData.length}
                             </Badge>
                         </Heading>
+
+                        <HStack spacing={2}>
+                            <Button
+                                size="sm"
+                                leftIcon={<span>🔍</span>}
+                                onClick={() => setShowFilters(!showFilters)}
+                                colorScheme={showFilters ? "brand" : "gray"}
+                                variant={showFilters ? "solid" : "outline"}
+                            >
+                                تصفية
+                            </Button>
+                            <Button
+                                size="sm"
+                                leftIcon={<span>📊</span>}
+                                onClick={() => setShowStats(!showStats)}
+                                colorScheme={showStats ? "brand" : "gray"}
+                                variant={showStats ? "solid" : "outline"}
+                            >
+                                إحصائيات
+                            </Button>
+                        </HStack>
                     </Flex>
 
-                    {viewMode === 'list' ? (
-                        <ListView data={currentData} activeTab={activeTab} />
-                    ) : (
-                        <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={6}>
-                            {currentData.map((item) => (
-                                <Card
-                                    key={item.id}
-                                    bg={cardBg}
-                                    shadow="sm"
-                                    _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
-                                    transition="all 0.2s"
-                                    as={activeTab !== 'resources' ? RouterLink : Link}
-                                    to={(() => {
-                                        if (activeTab === 'resources') return undefined
-                                        const map = { 'treaties': 'treaty', 'cases': 'case', 'resolutions': 'resolution' }
-                                        return `/${map[activeTab]}/${item.id}`
-                                    })()}
-                                    href={activeTab === 'resources' ? item.url : undefined}
-                                    isExternal={activeTab === 'resources'}
+                    {/* Collapsible Filter Panel */}
+                    <Collapse in={showFilters} animateOpacity>
+                        <Box
+                            p={4} mb={6} borderRadius="lg"
+                            bg={useColorModeValue('white', 'gray.800')}
+                            border="1px" borderColor={useColorModeValue('gray.200', 'gray.700')}
+                        >
+                            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                                <Box>
+                                    <Text fontSize="sm" mb={1} fontWeight="bold">الموضوع</Text>
+                                    <Select
+                                        placeholder="الكل"
+                                        size="sm"
+                                        value={topicFilter}
+                                        onChange={(e) => setTopicFilter(e.target.value)}
+                                    >
+                                        {allTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                                    </Select>
+                                </Box>
+                                <Box>
+                                    <Text fontSize="sm" mb={1} fontWeight="bold">من سنة</Text>
+                                    <Input
+                                        type="number" size="sm" placeholder="مثلاً 1990"
+                                        value={yearFrom}
+                                        onChange={(e) => setYearFrom(e.target.value)}
+                                    />
+                                </Box>
+                                <Box>
+                                    <Text fontSize="sm" mb={1} fontWeight="bold">إلى سنة</Text>
+                                    <Input
+                                        type="number" size="sm" placeholder="مثلاً 2024"
+                                        value={yearTo}
+                                        onChange={(e) => setYearTo(e.target.value)}
+                                    />
+                                </Box>
+                            </SimpleGrid>
+                            <Flex justify="flex-end" mt={4}>
+                                <Button
+                                    size="xs" colorScheme="red" variant="ghost"
+                                    onClick={() => { setTopicFilter(''); setYearFrom(''); setYearTo(''); }}
                                 >
-                                    <CardBody>
-                                        <VStack align="start" spacing={3}>
-                                            <TopicBadge topic={item.topic || item.category || item.type || 'عام'} />
-                                            <Heading size="md" noOfLines={2}>{item.name || item.title || item.number}</Heading>
-                                            <Text fontSize="sm" color="gray.500" noOfLines={3}>
-                                                {item.description || item.summary || item.subject || 'انقر للتفاصيل...'}
-                                            </Text>
+                                    إعادة تعيين
+                                </Button>
+                            </Flex>
+                        </Box>
+                    </Collapse>
 
-                                            <Box pt={2} w="100%" display="flex" justifyContent="space-between" alignItems="center">
-                                                <Text fontSize="xs" color="gray.400">{item.date || item.year}</Text>
-                                                {isNew(item.date) && <Badge colorScheme="green" variant="subtle">جديد</Badge>}
-                                            </Box>
-                                        </VStack>
-                                    </CardBody>
-                                </Card>
-                            ))}
-                        </SimpleGrid>
-                    )}
+                    {/* Collapsible Stats Panel */}
+                    <Collapse in={showStats} animateOpacity>
+                        <StatsPanel data={filteredData} />
+                    </Collapse>
+
+                    <Box id="content-to-export">
+
+                        {viewMode === 'list' ? (
+                            <ListView data={currentData} activeTab={activeTab} />
+                        ) : (
+                            <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={6}>
+                                {currentData.map((item) => (
+                                    <Card
+                                        key={item.id}
+                                        bg={cardBg}
+                                        shadow="sm"
+                                        _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
+                                        transition="all 0.2s"
+                                        as={activeTab !== 'resources' ? RouterLink : Link}
+                                        to={(() => {
+                                            if (activeTab === 'resources') return undefined
+                                            const map = { 'treaties': 'treaty', 'cases': 'case', 'resolutions': 'resolution' }
+                                            return `/${map[activeTab]}/${item.id}`
+                                        })()}
+                                        href={activeTab === 'resources' ? item.url : undefined}
+                                        isExternal={activeTab === 'resources'}
+                                    >
+                                        <CardBody>
+                                            <VStack align="start" spacing={3}>
+                                                <TopicBadge topic={item.topic || item.category || item.type || 'عام'} />
+                                                <Heading size="md" noOfLines={2}>{item.name || item.title || item.number}</Heading>
+                                                <Text fontSize="sm" color="gray.500" noOfLines={3}>
+                                                    {item.description || item.summary || item.subject || 'انقر للتفاصيل...'}
+                                                </Text>
+
+                                                <Box pt={2} w="100%" display="flex" justifyContent="space-between" alignItems="center">
+                                                    <Text fontSize="xs" color="gray.400">{item.date || item.year}</Text>
+                                                    <HStack>
+                                                        {isNew(item.date) && <Badge colorScheme="green" variant="subtle">جديد</Badge>}
+                                                        <IconButton
+                                                            icon={<span>{favorites.includes(String(item.id)) ? '❤️' : '🤍'}</span>}
+                                                            size="xs"
+                                                            variant="ghost"
+                                                            colorScheme="red"
+                                                            onClick={(e) => {
+                                                                e.preventDefault()
+                                                                if (!user) setAuthOpen(true)
+                                                                else toggleFavorite(item.id)
+                                                            }}
+                                                            aria-label="Add to favorites"
+                                                        />
+                                                    </HStack>
+                                                </Box>
+                                            </VStack>
+                                        </CardBody>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        )}
+                        <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} />
+                    </Box>
 
                     {filteredData.length === 0 && (
                         <Box textAlign="center" py={10}>
@@ -355,6 +589,6 @@ export default function App() {
                     )}
                 </Box>
             </Flex>
-        </Box>
+        </Box >
     )
 }

@@ -84,6 +84,38 @@ export function TreatyDetail() {
                 </CardBody>
             </Card>
 
+            {/* Full Text & Translation Section */}
+            <Box mb={6}>
+                <Card bg={cardBg} overflow="hidden">
+                    <CardBody>
+                        <HStack justify="space-between" mb={4}>
+                            <HStack>
+                                <Text fontSize="xl">📜</Text>
+                                <Heading size="md">نص الاتفاقية (Full Text)</Heading>
+                            </HStack>
+                            <Badge colorScheme={treaty.fullText ? "green" : "orange"}>
+                                {treaty.fullText ? "متوفر" : "غير متوفر محلياً"}
+                            </Badge>
+                        </HStack>
+
+                        <Box
+                            p={4}
+                            bg={useColorModeValue('gray.50', 'gray.900')}
+                            borderRadius="md"
+                            border="1px"
+                            borderColor={useColorModeValue('gray.200', 'gray.700')}
+                            maxH="400px"
+                            overflowY="auto"
+                            whiteSpace="pre-wrap"
+                        >
+                            <Text lineHeight="1.8" fontSize="md">
+                                {treaty.fullText || "عذراً، النص الكامل لهذه الوثيقة غير مخزن في قاعدة البيانات المحلية بعد (لأن حجم القوانين كبير جداً). \n\nيمكنك قراءة النص الكامل عبر الرابط الخارجي الرسمي أدناه، أو استخدام ميزة 'ترجمة الموقع' في الزاوية اليسرى لترجمة هذه الصفحة."}
+                            </Text>
+                        </Box>
+                    </CardBody>
+                </Card>
+            </Box>
+
             {/* Actions */}
             <HStack spacing={4} flexWrap="wrap">
                 <Button as={ChakraLink} href={treaty.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
@@ -174,6 +206,38 @@ export function CaseDetail() {
                 </CardBody>
             </Card>
 
+            {/* Full Text & Translation Section */}
+            <Box mb={6}>
+                <Card bg={cardBg} overflow="hidden">
+                    <CardBody>
+                        <HStack justify="space-between" mb={4}>
+                            <HStack>
+                                <Text fontSize="xl">📜</Text>
+                                <Heading size="md">نص القضية (Full Text)</Heading>
+                            </HStack>
+                            <Badge colorScheme={caseData.fullText ? "green" : "orange"}>
+                                {caseData.fullText ? "متوفر" : "غير متوفر محلياً"}
+                            </Badge>
+                        </HStack>
+
+                        <Box
+                            p={4}
+                            bg={useColorModeValue('gray.50', 'gray.900')}
+                            borderRadius="md"
+                            border="1px"
+                            borderColor={useColorModeValue('gray.200', 'gray.700')}
+                            maxH="400px"
+                            overflowY="auto"
+                            whiteSpace="pre-wrap"
+                        >
+                            <Text lineHeight="1.8" fontSize="md">
+                                {caseData.fullText || "عذراً، النص الكامل لهذه الوثيقة غير مخزن في قاعدة البيانات المحلية بعد (لأن حجم القوانين كبير جداً). \n\nيمكنك قراءة النص الكامل عبر الرابط الخارجي الرسمي أدناه، أو استخدام ميزة 'ترجمة الموقع' في الزاوية اليسرى لترجمة هذه الصفحة."}
+                            </Text>
+                        </Box>
+                    </CardBody>
+                </Card>
+            </Box>
+
             {/* Actions */}
             <HStack spacing={4} flexWrap="wrap">
                 <Button as={ChakraLink} href={caseData.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
@@ -183,7 +247,7 @@ export function CaseDetail() {
                     العودة للقائمة
                 </Button>
             </HStack>
-        </Box>
+        </Box >
     )
 }
 
@@ -251,6 +315,38 @@ export function ResolutionDetail() {
                 </CardBody>
             </Card>
 
+            {/* Full Text & Translation Section */}
+            <Box mb={6}>
+                <Card bg={cardBg} overflow="hidden">
+                    <CardBody>
+                        <HStack justify="space-between" mb={4}>
+                            <HStack>
+                                <Text fontSize="xl">📜</Text>
+                                <Heading size="md">نص القرار (Full Text)</Heading>
+                            </HStack>
+                            <Badge colorScheme={resolution.fullText ? "green" : "orange"}>
+                                {resolution.fullText ? "متوفر" : "غير متوفر محلياً"}
+                            </Badge>
+                        </HStack>
+
+                        <Box
+                            p={4}
+                            bg={useColorModeValue('gray.50', 'gray.900')}
+                            borderRadius="md"
+                            border="1px"
+                            borderColor={useColorModeValue('gray.200', 'gray.700')}
+                            maxH="400px"
+                            overflowY="auto"
+                            whiteSpace="pre-wrap"
+                        >
+                            <Text lineHeight="1.8" fontSize="md">
+                                {resolution.fullText || "عذراً، النص الكامل لهذه الوثيقة غير مخزن في قاعدة البيانات المحلية بعد (لأن حجم القوانين كبير جداً). \n\nيمكنك قراءة النص الكامل عبر الرابط الخارجي الرسمي أدناه، أو استخدام ميزة 'ترجمة الموقع' في الزاوية اليسرى لترجمة هذه الصفحة."}
+                            </Text>
+                        </Box>
+                    </CardBody>
+                </Card>
+            </Box>
+
             <HStack spacing={4} flexWrap="wrap">
                 {resolution.link && (
                     <Button as={ChakraLink} href={resolution.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
@@ -261,6 +357,6 @@ export function ResolutionDetail() {
                     العودة للقائمة
                 </Button>
             </HStack>
-        </Box>
+        </Box >
     )
 }

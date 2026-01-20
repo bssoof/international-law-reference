@@ -1,144 +1,84 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-    Button, FormControl, FormLabel, Input, VStack, Text, useToast, Tabs, TabList,
-    TabPanels, Tab, TabPanel, Avatar, Menu, MenuButton, MenuList, MenuItem, HStack
+    Tabs, TabList, TabPanels, Tab, TabPanel,
+    FormControl, FormLabel, Input, Button, VStack, useToast, Text, Alert, AlertIcon
 } from '@chakra-ui/react'
-import { FiUser, FiLogOut, FiStar, FiSettings } from 'react-icons/fi'
+import { useAuth } from '../hooks/useAuth'
 
-// Simple placeholder - auth is disabled for now
-const useAuth = () => ({
-    user: null,
-    favorites: [],
-    signIn: async () => ({ error: { message: 'غير متاح حالياً' } }),
-    signUp: async () => ({ error: { message: 'غير متاح حالياً' } }),
-    signOut: async () => { },
-})
-
-export function AuthModal({ isOpen, onClose }) {
-    const [isLogin, setIsLogin] = useState(true)
+export default function AuthModal({ isOpen, onClose }) {
+    const { signIn, signUp, isSupabaseReady } = useAuth()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [name, setName] = useState('')
-    const [loading, setLoading] = useState(false)
-    const { signIn, signUp } = useAuth()
+    const [isLoading, setIsLoading] = useState(false)
     const toast = useToast()
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-
+    const handleSubmit = async (isSignUp) => {
+        setIsLoading(true)
         try {
-            if (isLogin) {
-                const { error } = await signIn(email, password)
-                if (error) throw error
-                toast({ title: 'مرحباً بعودتك!', status: 'success', duration: 3000 })
-                onClose()
-            } else {
-                const { error } = await signUp(email, password, name)
-                if (error) throw error
-                toast({
-                    title: 'تم إنشاء الحساب!',
-                    description: 'تحقق من بريدك الإلكتروني لتأكيد الحساب',
-                    status: 'success',
-                    duration: 5000
-                })
-                onClose()
-            }
-        } catch (error) {
-            toast({ title: 'خطأ', description: error.message, status: 'error', duration: 5000 })
-        }
+            const { error } = isSignUp
+                ? await signUp(email, password)
+                : await signIn(email, password)
 
-        setLoading(false)
+            if (error) throw error
+
+            toast({
+                title: isSignUp ? 'تم إنشاء الحساب بنجاح!' : 'تم تسجيل الدخول بنجاح',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            })
+            onClose()
+        } catch (error) {
+            toast({
+                title: 'خطأ',
+                description: error.message,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
-            <ModalOverlay backdropFilter="blur(4px)" />
-            <ModalContent mx={4}>
-                <ModalHeader textAlign="center">
-                    {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
-                </ModalHeader>
+            <ModalOverlay />
+            <ModalContent>
+                <ModalHeader>تسجيل الدخول / اشتراك</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                    <Tabs isFitted onChange={(i) => setIsLogin(i === 0)}>
-                        <TabList mb={4}>
+                    {!isSupabaseReady && (
+                        <Alert status="warning" mb={4} borderRadius="md" fontSize="sm">
+                            <AlertIcon />
+                            يجب تفعيل Supabase لتسجيل الدخول.
+                        </Alert>
+                    )}
+
+                    <Tabs isFitted variant="enclosed" colorScheme="brand">
+                        <TabList mb="1em">
                             <Tab>دخول</Tab>
-                            <Tab>تسجيل</Tab>
+                            <Tab>حساب جديد</Tab>
                         </TabList>
                         <TabPanels>
-                            <TabPanel p={0}>
-                                <form onSubmit={handleSubmit}>
-                                    <VStack spacing={4}>
-                                        <FormControl isRequired>
-                                            <FormLabel>البريد الإلكتروني</FormLabel>
-                                            <Input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="example@email.com"
-                                            />
-                                        </FormControl>
-                                        <FormControl isRequired>
-                                            <FormLabel>كلمة المرور</FormLabel>
-                                            <Input
-                                                type="password"
-                                                value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                            />
-                                        </FormControl>
-                                        <Button
-                                            type="submit"
-                                            colorScheme="brand"
-                                            width="100%"
-                                            isLoading={loading}
-                                        >
-                                            دخول
-                                        </Button>
-                                    </VStack>
-                                </form>
+                            <TabPanel>
+                                <AuthForm
+                                    email={email} setEmail={setEmail}
+                                    password={password} setPassword={setPassword}
+                                    onSubmit={() => handleSubmit(false)}
+                                    isLoading={isLoading}
+                                    label="تسجيل الدخول"
+                                />
                             </TabPanel>
-                            <TabPanel p={0}>
-                                <form onSubmit={handleSubmit}>
-                                    <VStack spacing={4}>
-                                        <FormControl isRequired>
-                                            <FormLabel>الاسم</FormLabel>
-                                            <Input
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                placeholder="اسمك الكامل"
-                                            />
-                                        </FormControl>
-                                        <FormControl isRequired>
-                                            <FormLabel>البريد الإلكتروني</FormLabel>
-                                            <Input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="example@email.com"
-                                            />
-                                        </FormControl>
-                                        <FormControl isRequired>
-                                            <FormLabel>كلمة المرور</FormLabel>
-                                            <Input
-                                                type="password"
-                                                value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                                minLength={6}
-                                            />
-                                        </FormControl>
-                                        <Button
-                                            type="submit"
-                                            colorScheme="green"
-                                            width="100%"
-                                            isLoading={loading}
-                                        >
-                                            إنشاء حساب
-                                        </Button>
-                                    </VStack>
-                                </form>
+                            <TabPanel>
+                                <AuthForm
+                                    email={email} setEmail={setEmail}
+                                    password={password} setPassword={setPassword}
+                                    onSubmit={() => handleSubmit(true)}
+                                    isLoading={isLoading}
+                                    label="إنشاء حساب"
+                                />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
@@ -148,51 +88,35 @@ export function AuthModal({ isOpen, onClose }) {
     )
 }
 
-export function UserMenu() {
-    const { user, signOut, favorites } = useAuth()
-    const [isAuthOpen, setIsAuthOpen] = useState(false)
-
-    if (!user) {
-        return (
-            <>
-                <Button
-                    size="sm"
-                    colorScheme="brand"
-                    leftIcon={<FiUser />}
-                    onClick={() => setIsAuthOpen(true)}
-                >
-                    دخول
-                </Button>
-                <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
-            </>
-        )
-    }
-
+function AuthForm({ email, setEmail, password, setPassword, onSubmit, isLoading, label }) {
     return (
-        <Menu>
-            <MenuButton as={Button} variant="ghost" p={0}>
-                <HStack spacing={2}>
-                    <Avatar
-                        size="sm"
-                        name={user.user_metadata?.full_name || user.email}
-                        bg="brand.500"
-                    />
-                    <Text fontSize="sm" display={{ base: 'none', md: 'block' }}>
-                        {user.user_metadata?.full_name || 'مستخدم'}
-                    </Text>
-                </HStack>
-            </MenuButton>
-            <MenuList>
-                <MenuItem icon={<FiStar />}>
-                    المفضلة ({favorites.length})
-                </MenuItem>
-                <MenuItem icon={<FiSettings />}>
-                    الإعدادات
-                </MenuItem>
-                <MenuItem icon={<FiLogOut />} onClick={signOut} color="red.500">
-                    تسجيل الخروج
-                </MenuItem>
-            </MenuList>
-        </Menu>
+        <VStack spacing={4}>
+            <FormControl>
+                <FormLabel>البريد الإلكتروني</FormLabel>
+                <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="example@mail.com"
+                />
+            </FormControl>
+            <FormControl>
+                <FormLabel>كلمة المرور</FormLabel>
+                <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="******"
+                />
+            </FormControl>
+            <Button
+                colorScheme="brand"
+                width="full"
+                onClick={onSubmit}
+                isLoading={isLoading}
+            >
+                {label}
+            </Button>
+        </VStack>
     )
 }
