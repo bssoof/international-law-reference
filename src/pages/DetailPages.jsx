@@ -118,9 +118,11 @@ export function TreatyDetail() {
 
             {/* Actions */}
             <HStack spacing={4} flexWrap="wrap">
-                <Button as={ChakraLink} href={treaty.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
-                    عرض النص الكامل
-                </Button>
+                {treaty.link && treaty.link !== '#' && (
+                    <Button as={ChakraLink} href={treaty.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
+                        عرض النص الكامل
+                    </Button>
+                )}
                 <Button as={Link} to="/" variant="outline" leftIcon={<span>➡️</span>}>
                     العودة للقائمة
                 </Button>
@@ -240,9 +242,11 @@ export function CaseDetail() {
 
             {/* Actions */}
             <HStack spacing={4} flexWrap="wrap">
-                <Button as={ChakraLink} href={caseData.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
-                    عرض تفاصيل القضية
-                </Button>
+                {caseData.link && caseData.link !== '#' && (
+                    <Button as={ChakraLink} href={caseData.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
+                        عرض تفاصيل القضية
+                    </Button>
+                )}
                 <Button as={Link} to="/" variant="outline" leftIcon={<span>➡️</span>}>
                     العودة للقائمة
                 </Button>
@@ -348,7 +352,7 @@ export function ResolutionDetail() {
             </Box>
 
             <HStack spacing={4} flexWrap="wrap">
-                {resolution.link && (
+                {resolution.link && resolution.link !== '#' && (
                     <Button as={ChakraLink} href={resolution.link} isExternal colorScheme="brand" leftIcon={<span>🔗</span>}>
                         عرض نص القرار
                     </Button>

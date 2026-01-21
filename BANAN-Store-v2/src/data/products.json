@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "name": "Tulip Garden Mug",
+        "price": 28.00,
+        "image": "/images/mug1.jpg",
+        "category": "Mugs",
+        "description": "Elegant white mug with delicate red tulips. Comes with a matching wavy saucer."
+    },
+    {
+        "id": 2,
+        "name": "Blue Floral Classic",
+        "price": 26.50,
+        "image": "/images/mug2.jpg",
+        "category": "Sets",
+        "description": "Vintage-inspired cup with blue floral patterns and a classic royal blue saucer."
+    },
+    {
+        "id": 3,
+        "name": "Panda Stripes",
+        "price": 24.00,
+        "image": "/images/mug3.jpg",
+        "category": "Mugs",
+        "description": "Cute panda design with fresh green stripes. Perfect for your morning milk."
+    },
+    {
+        "id": 4,
+        "name": "Pink RICH Pot",
+        "price": 32.00,
+        "image": "/images/mug4.jpg",
+        "category": "Pots",
+        "description": "Quirky pink pot with a face and 'RICH' slogan. A statement piece."
+    },
+    {
+        "id": 5,
+        "name": "Cherry Love Set",
+        "price": 35.00,
+        "image": "/images/mug5.jpg",
+        "category": "Sets",
+        "description": "Adorable set with heart-shaped handles and cherry patterns. Includes saucer."
+    }
+]

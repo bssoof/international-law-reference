@@ -213,6 +213,17 @@ export default function App() {
             .slice(0, 5)
     }, [treaties, cases, resolutions])
 
+    // Arabic Text Normalization
+    const normalizeArabic = (text) => {
+        if (!text) return ''
+        return text
+            .replace(/(آ|إ|أ)/g, 'ا')
+            .replace(/(ة)/g, 'ه')
+            .replace(/(ئ|ؤ)/g, 'ء')
+            .replace(/(ى)/g, 'ي')
+            .toLowerCase() // technically irrelevant for Arabic but good for mixed content
+    }
+
     const filterData = (data) => {
         if (!data) return []
 
@@ -220,16 +231,19 @@ export default function App() {
             const name = item.name || item.title || item.number || ''
             const desc = item.description || item.summary || item.subject || ''
             const topic = item.topic || item.category || item.type || ''
+            const body = item.fullText || ''
+
+            // Context Strings for Search
+            const context = [name, desc, topic, body].map(normalizeArabic).join(' ')
+            const query = normalizeArabic(debouncedSearch)
+
             // Improved Year Parsing
             const dateStr = (item.date || item.year || '').toString()
             const yearMatch = dateStr.match(/\d{4}/)
             const year = yearMatch ? parseInt(yearMatch[0]) : 0
 
             // Text search
-            const matchesSearch = !debouncedSearch ||
-                name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-                desc.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-                topic.toLowerCase().includes(debouncedSearch.toLowerCase())
+            const matchesSearch = !query || context.includes(query)
 
             // Topic filter
             const matchesTopic = !topicFilter || topic === topicFilter
